@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>소수 방어전: 암호 해독 터미널</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+KR:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #050a0f;
+            --text-color: #00ff41;
+            --border-color: #008f11;
+            --alert-color: #ff003c;
+            --panel-bg: rgba(0, 255, 65, 0.05);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Noto Sans KR', 'Share Tech Mono', monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .terminal-container {
+            width: 100%;
+            max-width: 900px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            background: var(--border-color);
+            color: #000;
+            padding: 10px 20px;
+            font-weight: bold;
+            font-size: 1.2em;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #111;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            color: #555;
+            font-family: inherit;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active {
+            color: var(--text-color);
+            background: var(--panel-bg);
+            border-bottom: 3px solid var(--text-color);
+        }
+
+        .tab-btn:hover { color: var(--text-color); }
+
+        .mission-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.5s;
+        }
+
+        .mission-content.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 { border-bottom: 1px dashed var(--text-color); padding-bottom: 10px; }
+        
+        .box {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+
+        .cipher-text {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.5em;
+            letter-spacing: 3px;
+            color: #fff;
+            background: #222;
+            padding: 15px;
+            text-align: center;
+            border-radius: 5px;
+            word-break: break-all;
+        }
+
+        input[type="number"], input[type="text"] {
+            background: #000;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 10px;
+            font-size: 1.2em;
+            font-family: inherit;
+            text-align: center;
+            width: 80px;
+            margin: 0 10px;
+        }
+
+        button.action-btn {
+            background: var(--border-color);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 3px;
+            font-family: inherit;
+            transition: 0.2s;
+        }
+
+        button.action-btn:hover {
+            background: var(--text-color);
+            box-shadow: 0 0 10px var(--text-color);
+        }
+
+        .result-msg { margin-top: 15px; font-size: 1.2em; font-weight: bold; min-height: 30px; }
+        .success { color: var(--text-color); }
+        .error { color: var(--alert-color); }
+
+    </style>
+</head>
+<body>
+
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <span>> SYS.ADMIN // PRIME_DEFENSE_PROTOCOL</span>
+            <span id="clock">00:00:00</span>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="openTab('mission1', this)">[LV.1] 시저 암호</button>
+            <button class="tab-btn" onclick="openTab('mission2', this)">[LV.2] 빈도수 분석</button>
+            <button class="tab-btn" onclick="openTab('mission3', this)">[LV.3] 소수의 방패</button>
+        </div>
+
+        <div id="mission1" class="mission-content active">
+            <h2>> MISSION 1 : 고대 로마의 암호를 해독하라</h2>
+            <p>해커가 첫 번째 암호문을 보냈습니다. 알파벳을 일정한 수만큼 밀어서 만든 '시저 암호'입니다. <br>단서: 해커는 알파벳을 <b>몇 칸</b> 밀었을까요?</p>
+            
+            <div class="box">
+                <div>[수신된 암호문]</div>
+                <div class="cipher-text" id="m1-cipher">PDWK LV WKH NHB</div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <label>알파벳 이동 칸 수(Shift) : </label>
+                <input type="number" id="m1-shift" value="0" min="0" max="25" oninput="decodeCaesar()">
+            </div>
+
+            <div class="box" style="margin-top: 20px;">
+                <div>[해독된 메시지]</div>
+                <div class="cipher-text" id="m1-result" style="color: var(--text-color); background: none;">-</div>
+            </div>
+        </div>
+
+        <div id="mission2" class="mission-content">
+            <h2>> MISSION 2 : 패턴을 찾아라 (빈도수 분석)</h2>
+            <p>시저 암호보다 복잡한 치환 암호입니다. 영어 문장에서 가장 많이 쓰이는 알파벳 1위는 'E', 2위는 'T', 3위는 'A'입니다. 아래 암호문에서 가장 많이 등장한 알파벳을 찾아 E, T, A로 바꿔보세요.</p>
+            
+            <div class="box">
+                <div>[수신된 암호문]</div>
+                <div class="cipher-text" id="m2-cipher" style="font-size: 1.2em;">
+                    XQ OYV KI QYI MY OYV KI QYI... XLMW MW E WIYVIX QIWWEKI.
+                </div>
+            </div>
+
+            <div class="box" style="display: flex; justify-content: space-around; align-items: center;">
+                <div>
+                    알파벳 <input type="text" id="m2-from1" maxlength="1" style="width:40px"> 를 
+                    <strong style="color: #fff; font-size: 1.5em; margin: 0 10px;">E</strong> 로 변경
+                </div>
+                <button class="action-btn" onclick="applyFrequency()">치환 적용</button>
+            </div>
+
+            <div class="box">
+                <div>[실시간 해독 현황]</div>
+                <div class="cipher-text" id="m2-result" style="color: var(--text-color); background: none;">-</div>
+            </div>
+        </div>
+
+        <div id="mission3" class="mission-content">
+            <h2>> FINAL MISSION : 슈퍼컴퓨터도 못 푸는 금고</h2>
+            <p>현대 암호(RSA)는 두 개의 '소수'를 곱하여 만듭니다. 두 소수를 곱하는 것은 쉽지만, 곱해진 거대한 수를 다시 두 소수로 쪼개는(소인수분해) 것은 매우 어렵습니다.</p>
+            
+            <div class="box">
+                <h3 style="color: #fff; margin-top: 0;">[방어 훈련] 거대 합성수 만들기</h3>
+                <p>해커가 풀지 못하도록 두 개의 소수를 곱해 자물쇠(합성수)를 만드세요.</p>
+                <div style="display: flex; justify-content: center; align-items: center;">
+                    <input type="number" id="m3-prime1" placeholder="소수 1"> × 
+                    <input type="number" id="m3-prime2" placeholder="소수 2"> = 
+                    <span id="m3-multiply-result" style="font-size: 1.5em; margin-left: 10px; font-weight: bold; color: #fff;">?</span>
+                </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button class="action-btn" onclick="multiplyPrimes()">자물쇠 생성</button>
+                </div>
+            </div>
+
+            <div class="box" style="border-color: var(--alert-color);">
+                <h3 style="color: var(--alert-color); margin-top: 0;">[해킹 훈련] 해커의 금고 열기 (소인수분해)</h3>
+                <p>해커가 금고를 <strong>3233</strong> 이라는 숫자로 잠갔습니다. 이 숫자는 두 소수의 곱입니다. 두 소수를 찾아 금고를 여세요!</p>
+                <div style="display: flex; justify-content: center; align-items: center;">
+                    <input type="number" id="m3-factor1" placeholder="소수"> × 
+                    <input type="number" id="m3-factor2" placeholder="소수">
+                </div>
+                <div style="text-align: center; margin-top: 15px;">
+                    <button class="action-btn" onclick="breakLock()" style="background: var(--alert-color); color: #fff;">금고 해제 시도</button>
+                    <div id="m3-lock-msg" class="result-msg"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 시계 업데이트
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('en-US', { hour12: false });
+        }, 1000);
+
+        // 탭 전환 로직
+        function openTab(tabId, btn) {
+            document.querySelectorAll('.mission-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        // 미션 1: 시저 암호 해독
+        function decodeCaesar() {
+            const shift = parseInt(document.getElementById('m1-shift').value) || 0;
+            const text = "PDWK LV WKH NHB".split(''); // 정답: MATH IS THE KEY (Shift 3)
+            const decoded = text.map(c => {
+                if (c >= 'A' && c <= 'Z') {
+                    return String.fromCharCode((c.charCodeAt(0) - 65 - shift + 26) % 26 + 65);
+                }
+                return c;
+            }).join('');
+            document.getElementById('m1-result').innerText = decoded;
+        }
+
+        // 미션 2: 빈도수 분석 (단순 치환)
+        function applyFrequency() {
+            const original = "XQ OYV KI QYI MY OYV KI QYI... XLMW MW E WIYVIX QIWWEKI."; 
+            // 실제 문장: TO BE OR NOT TO BE OR NOT... THIS IS A SECRET MESSAGE.
+            // 치환: O->B, Y->E, V->R, K->O, I->T ... (여기서는 E 하나만 시연)
+            const targetChar = document.getElementById('m2-from1').value.toUpperCase();
+            
+            if(!targetChar) return;
+
+            let result = "";
+            for(let i=0; i<original.length; i++) {
+                if(original[i] === targetChar) {
+                    result += "<span style='color:#fff; text-decoration:underline;'>E</span>";
+                } else {
+                    result += original[i];
+                }
+            }
+            document.getElementById('m2-result').innerHTML = result;
+        }
+
+        // 미션 3: 소수 판별 유틸
+        function isPrime(num) {
+            if (num <= 1) return false;
+            for (let i = 2; i <= Math.sqrt(num); i++) {
+                if (num % i === 0) return false;
+            }
+            return true;
+        }
+
+        // 미션 3: 자물쇠 생성 (곱하기)
+        function multiplyPrimes() {
+            const p1 = parseInt(document.getElementById('m3-prime1').value);
+            const p2 = parseInt(document.getElementById('m3-prime2').value);
+            
+            if (!p1 || !p2) {
+                alert("두 숫자를 모두 입력하세요.");
+                return;
+            }
+            if (!isPrime(p1) || !isPrime(p2)) {
+                alert("경고: 입력한 숫자가 '소수(Prime)'가 아닙니다! 보안이 취약합니다.");
+                return;
+            }
+            document.getElementById('m3-multiply-result').innerText = (p1 * p2).toLocaleString();
+        }
+
+        // 미션 3: 금고 해제 (소인수분해)
+        function breakLock() {
+            const target = 3233; // 53 * 61
+            const f1 = parseInt(document.getElementById('m3-factor1').value);
+            const f2 = parseInt(document.getElementById('m3-factor2').value);
+            const msgEl = document.getElementById('m3-lock-msg');
+
+            if (!f1 || !f2) {
+                msgEl.innerText = "두 소수를 입력하세요.";
+                msgEl.className = "result-msg error";
+                return;
+            }
+
+            if (f1 * f2 === target && isPrime(f1) && isPrime(f2)) {
+                msgEl.innerText = "ACCESS GRANTED: 금고 해제 성공! (53 × 61)";
+                msgEl.className = "result-msg success";
+            } else {
+                msgEl.innerText = "ACCESS DENIED: 곱이 3233이 아니거나, 소수가 아닙니다.";
+                msgEl.className = "result-msg error";
+            }
+        }
+
+        // 초기화
+        decodeCaesar();
+        document.getElementById('m2-result').innerText = "XQ OYV KI QYI MY OYV KI QYI... XLMW MW E WIYVIX QIWWEKI.";
+    </script>
+</body>
+</html>
